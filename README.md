@@ -1,0 +1,2 @@
+# bifurcationjax
+Bifurcation library 

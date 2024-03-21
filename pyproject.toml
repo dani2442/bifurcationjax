@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "poetry install"
+version = "0.1.0"
+description = ""
+authors = ["dani2442 <daniel.l.m.2442.123@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ipykernel = "^6.29.3"
+matplotlib = "^3.8.3"
+jax = "^0.4.25"
+jaxlib = "^0.4.25"
+
+
+[tool.poetry.group.dev.dependencies]
+notebook = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

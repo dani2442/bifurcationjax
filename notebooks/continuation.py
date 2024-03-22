@@ -1,8 +1,8 @@
 import jax.numpy as jnp
 import jax
-import matplotlib.pyplot as plt
 from functools import partial
 
+@partial(jax.jit, static_argnums=(1,2,3))
 def mixed_jacobian(z, k, f, J):
     x, p = z[:-1], z[-1]
     j = J(x, p)
@@ -14,13 +14,14 @@ def mixed_jacobian(z, k, f, J):
     Jfinal = jnp.concat([Jmixed, last_row.T])
     return Jfinal
 
+@partial(jax.jit, static_argnums=(2,3,4))
 def newton_step(z, zpred, i, f, J, delta):
     Jfinal = mixed_jacobian(z, i, f, J)
     x = z[:-1]
     p = z[-1]
     g = f(x, p)
     gz = jnp.append(g, z[i] - zpred[i])
-    z = z - jnp.linalg.inv(Jfinal) @ gz
+    z = z - delta*jnp.linalg.inv(Jfinal) @ gz
     return z
 
 def corrector(zpred, f, J, delta=0.9, max_steps=200, epsilon=1e-6, k=0):
@@ -53,7 +54,8 @@ def _continuation(zs, f, J, dz0, pmin, pmax):
     zs += [z]
     return zs, success
 
-def continuation(f, J, x0, p0, pmin, pmax, dp0, dx0, N=1000):
+def continuation(f, x0, p0, pmin, pmax, dp0, dx0, N=1000):
+    J = jax.jit(jax.jacobian(f))
     z0 = jnp.append(x0, p0)
     zs = [z0]
     dz0 = jnp.append(dx0, dp0)

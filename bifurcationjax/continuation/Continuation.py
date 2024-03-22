@@ -2,27 +2,26 @@ import jax
 import jax.numpy as jnp
 
 from bifurcationjax.BifurcationProblem import BifurcationProblem
-from bifurcationjax.continuation import Correction
-from bifurcationjax.continuation import Prediction
+from bifurcationjax.continuation import Corrector
+from bifurcationjax.continuation import Predictor
 
 
-def continuation(prob: BifurcationProblem, correction: Correction, prediction: Prediction, p_min: float, p_max: float, dsmax: float = 1., max_steps: int = 1000):
+def continuation(prob: BifurcationProblem, correction: Corrector, prediction: Predictor, p_min: float, p_max: float, dsmax: float = 1e-2, max_steps: int = 1000):
     J = jax.jit(jax.jacobian(prob.f))
-    z0 = jnp.append(prob.x0, prob.p0)
-    zs = [z0]
+    z = jnp.append(prob.x0, prob.p0)
+    zs = []
 
-    ps = [prob.p0]
-    xs = [prob.x0]
     stability = []
     for _ in range(max_steps):
         zpred, v = prediction(z, dsmax, J)
         if p_min>zpred[-1] or p_max<zpred[-1]:
-            return zs, False
-        z, success = correction(zpred, prob.f, v, dsmax)
-        zs += [z]
-        # Stop iteration if we exceed given parameter margins
+            success = False
+        else:
+            z, success = correction(zpred, prob.f, v, dsmax)
+
         if not success: break
-        # Detect stability of found fixed point
+        zs += [z]
+
         eigenvalues = jnp.linalg.eigvals(J(z[:-1], z[-1]))  
         isstable = jnp.max(eigenvalues.real)<0
         stability += [isstable]

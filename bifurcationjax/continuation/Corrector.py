@@ -15,10 +15,10 @@ class Corrector(ABC):
     def _newton_step(self, z, zpred, f, delta, v, h):
         pass
 
-    def __callable__(self, zpred, f, v, h):
+    def __call__(self, zpred, f, v, h):
         c = 0
         z0 = zpred
-        z1 = self._newton_step(z0, zpred, f, self.delta)
+        z1 = self._newton_step(z0, zpred, f, self.delta, v, h)
         while jnp.linalg.norm(z1 - z0, ord=2)>self.epsilon:
             z0 = z1
             z1 = self._newton_step(z0, zpred, f, self.delta, v, h)
@@ -29,7 +29,7 @@ class Corrector(ABC):
         return z1, True
 
 
-class NaturalContinuation(Corrector):
+class NaturalCorrector(Corrector):
     def __init__(self, k=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.k = k
@@ -45,7 +45,7 @@ class NaturalContinuation(Corrector):
         Jfinal = jnp.concat([Jmixed, last_row.T])
         return Jfinal
 
-    @partial(jax.jit, static_argnums=(2,3,4))
+    @partial(jax.jit, static_argnums=(0,3,4))
     def _newton_step(self, z, zpred, f, delta, v, h):
         Jfinal = self._mixed_jacobian(z, f)
         g = f(z[:-1], z[-1])
@@ -69,7 +69,7 @@ class PALC(Corrector):
         Jfinal = jnp.concat([Jmixed, last_row.T])
         return Jfinal
 
-    @partial(jax.jit, static_argnums=(2,3,4))
+    @partial(jax.jit, static_argnums=(0,3))
     def _newton_step(self, z, zpred, f, delta, v, h):
         Jfinal = self._mixed_jacobian(z, f)
         g = f(z[:-1], z[-1])

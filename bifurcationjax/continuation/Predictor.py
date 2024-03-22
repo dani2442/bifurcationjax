@@ -36,7 +36,7 @@ class SecantPredictor(Predictor):
 
 class TangentPredictor(Predictor):
     def __init__(self, dz0: Optional[jax.Array] = None, k: Optional[int] = 0) -> None:
-        self.dz0 = None
+        self.dz0 = dz0
         self.prev_v = None
         self.k = k
 

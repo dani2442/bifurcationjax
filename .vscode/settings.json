@@ -1,5 +1,6 @@
 {
     "notebook.cellToolbarLocation": {
         "default": "hidden"
-    }
+    },
+    "terminal.integrated.env.linux": {"PYTHONPATH": "${workspaceFolder}"},
 }

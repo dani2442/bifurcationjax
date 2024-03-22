@@ -34,7 +34,7 @@ class NaturalContinuation(Corrector):
         super().__init__(*args, **kwargs)
         self.k = k
 
-    @partial(jax.jit, static_argnums=(0, 2,3))
+    @partial(jax.jit, static_argnums=(0,2))
     def _mixed_jacobian(self, z, f):
         x, p = z[:-1], z[-1]
         j = jax.jacobian(f, argnums=0)(x, p)
@@ -58,7 +58,7 @@ class PALC(Corrector):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @partial(jax.jit, static_argnums=(0,2,3))
+    @partial(jax.jit, static_argnums=(0,2))
     def _mixed_jacobian(self, z, f):
         x, p = z[:-1], z[-1]
         j = jax.jacobian(f, argnums=0)(x, p)

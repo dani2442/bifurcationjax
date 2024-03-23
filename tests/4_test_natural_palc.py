@@ -26,39 +26,11 @@ dp0 = 0.02
 dx0 = jnp.array([0.01, 0.01, 0.01])
 dz0 = jnp.append(dx0, dp0)
 
-### Test 1
 prob = BifurcationProblem(maasch_rule, x0, p0, dx0, dp0)
-prediction = SecantPredictor(dz0)
-correction = NaturalCorrector()
-xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
-
-colors = ["blue" if s else "red" for s in stability]
-plt.scatter(ps, [x[0] for x in xs], c=colors)
-plt.show()
-
-### Test 2
-prediction = SecantPredictor(dz0)
-correction = PALC()
-xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
-
-colors = ["blue" if s else "red" for s in stability]
-plt.scatter(ps, [x[0] for x in xs], c=colors)
-plt.show()
-
-### Test 3
-prediction = TangentPredictor(dz0)
-correction = PALC()
-xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
-
-colors = ["blue" if s else "red" for s in stability]
-plt.scatter(ps, [x[0] for x in xs], c=colors)
-plt.show()
-
-
 ### Test 4
-prediction = NaturalPredictor(dz0)
-correction = PALC()
-xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
+prediction = NaturalPredictor()
+correction = NaturalCorrector()
+xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max, dsmax=0.002)
 
 colors = ["blue" if s else "red" for s in stability]
 plt.scatter(ps, [x[0] for x in xs], c=colors)

@@ -26,8 +26,9 @@ dp0 = 0.02
 dx0 = jnp.array([0.01, 0.01, 0.01])
 dz0 = jnp.append(dx0, dp0)
 
-### Test 1
 prob = BifurcationProblem(maasch_rule, x0, p0, dx0, dp0)
+
+### Test 1
 prediction = SecantPredictor(dz0)
 correction = NaturalCorrector()
 xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)

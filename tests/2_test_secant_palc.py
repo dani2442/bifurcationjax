@@ -2,8 +2,8 @@ import jax.numpy as jnp
 import jax
 import matplotlib.pyplot as plt
 
-from bifurcationjax.continuation.Corrector import NaturalCorrector, PALC
 from bifurcationjax.continuation.Predictor import SecantPredictor, TangentPredictor, NaturalPredictor
+from bifurcationjax.continuation.Corrector import NaturalCorrector, PALC
 from bifurcationjax.continuation.Continuation import continuation
 from bifurcationjax.BifurcationProblem import BifurcationProblem
 
@@ -26,29 +26,21 @@ dp0 = 0.02
 dx0 = jnp.array([0.01, 0.01, 0.01])
 dz0 = jnp.append(dx0, dp0)
 
-### Test 1
 prob = BifurcationProblem(maasch_rule, x0, p0, dx0, dp0)
-correction = NaturalCorrector()
-prediction = SecantPredictor(dz0)
-xs, ps, stability = continuation(prob, correction, prediction, p_min, p_max)
-
-colors = ["blue" if s else "red" for s in stability]
-plt.scatter(ps, [x[0] for x in xs], c=colors)
-plt.show()
 
 ### Test 2
-correction = PALC()
-prediction = SecantPredictor(dz0)
-xs, ps, stability = continuation(prob, correction, prediction, p_min, p_max)
+prediction = TangentPredictor(dz0)
+correction = NaturalCorrector()
+xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
 
 colors = ["blue" if s else "red" for s in stability]
 plt.scatter(ps, [x[0] for x in xs], c=colors)
 plt.show()
 
 ### Test 3
-correction = PALC()
 prediction = TangentPredictor(dz0)
-xs, ps, stability = continuation(prob, correction, prediction, p_min, p_max)
+correction = PALC()
+xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
 
 colors = ["blue" if s else "red" for s in stability]
 plt.scatter(ps, [x[0] for x in xs], c=colors)
@@ -56,9 +48,9 @@ plt.show()
 
 
 ### Test 4
-correction = PALC()
 prediction = NaturalPredictor(dz0)
-xs, ps, stability = continuation(prob, correction, prediction, p_min, p_max)
+correction = PALC()
+xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
 
 colors = ["blue" if s else "red" for s in stability]
 plt.scatter(ps, [x[0] for x in xs], c=colors)

@@ -6,14 +6,14 @@ from bifurcationjax.continuation import Corrector
 from bifurcationjax.continuation import Predictor
 
 
-def continuation(prob: BifurcationProblem, correction: Corrector, prediction: Predictor, p_min: float, p_max: float, dsmax: float = 1e-2, max_steps: int = 1000):
+def continuation(prob: BifurcationProblem, prediction: Predictor, correction: Corrector, p_min: float, p_max: float, dsmax: float = 1e-2, max_steps: int = 1000):
     J = jax.jit(jax.jacobian(prob.f))
     z = jnp.append(prob.x0, prob.p0)
     zs = []
 
     stability = []
     for _ in range(max_steps):
-        zpred, v = prediction(z, dsmax, J)
+        zpred, v = prediction(z, dsmax, prob.f)
         if p_min>zpred[-1] or p_max<zpred[-1]:
             success = False
         else:

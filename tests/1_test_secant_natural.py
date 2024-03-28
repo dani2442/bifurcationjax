@@ -37,7 +37,7 @@ xs, ps, stability = continuation(prob, prediction, correction, p_min, p_max)
 colors = ["blue" if s else "red" for s in stability]
 plt.scatter(ps, [x[0] for x in xs], c=colors)
 plt.show()
-
+""" 
 ### Test 2
 prediction = SecantPredictor(dz0)
 correction = NaturalCorrector()
@@ -65,4 +65,4 @@ colors = ["blue" if s else "red" for s in stability]
 plt.scatter(ps, [x[0] for x in xs], c=colors)
 plt.show()
 
-print("hello")
+print("hello") """

@@ -22,9 +22,10 @@ class SecantPredictor(Predictor):
         self.theta = 0.5
         self.prev = None
     
+    @partial(jax.jit,  static_argnums=(0))
     def norm(self, z):
         x, p = z[...,:-1], z[...,-1]
-        return jnp.sqrt(self.theta*jnp.dot(x,x)/jnp.linalg.norm(x, ord=2) + (1-self.theta)*p**2)
+        return jnp.sqrt(self.theta*jnp.dot(x,x)/(jnp.linalg.norm(x, ord=2)+1e-6) + (1-self.theta)*p**2)
 
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
         if self.prev is None:
@@ -33,7 +34,7 @@ class SecantPredictor(Predictor):
             v = (z-self.prev)
 
         #v = v/jnp.linalg.norm(v, ord=2)
-        v = v/self.norm(v)
+        v = v/jnp.linalg.norm(v, ord=2)
 
         z_new = z + ds*v
         self.prev = z
@@ -47,9 +48,10 @@ class TangentPredictor(Predictor):
         self.theta = 0.5
         self.k = k
 
+    @partial(jax.jit,  static_argnums=(0))
     def norm(self, z):
         x, p = z[...,:-1], z[...,-1]
-        return jnp.sqrt(self.theta*jnp.dot(x,x)/jnp.linalg.norm(x, ord=2) + (1-self.theta)*p**2)
+        return self.theta*jnp.dot(x,x)/(jnp.linalg.norm(x, ord=2) + 1e-5) + (1-self.theta)*p**2
 
 
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
@@ -69,8 +71,8 @@ class TangentPredictor(Predictor):
             v = jnp.linalg.inv(Jfinal)@jnp.eye(len(z), M=1, k=1-len(z))
         
         v = v.reshape(-1)
-        v = v/self.norm(v)
-        #v = v.reshape(-1)/jnp.linalg.norm(v, ord=2)
+        #v = v/self.norm(v)
+        v = v.reshape(-1)/jnp.linalg.norm(v, ord=2)
         z_new = z + v*ds
         self.prev_v = v
 

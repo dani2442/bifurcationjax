@@ -9,6 +9,9 @@ class Predictor(ABC):
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> Any:
         pass
 
+    def reset(self):
+        pass
+
 
 class NaturalPredictor(Predictor):
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
@@ -39,6 +42,9 @@ class SecantPredictor(Predictor):
         z_new = z + ds*v
         self.prev = z
         return z_new, v
+    
+    def reset(self):
+        self.prev = None
 
 
 class TangentPredictor(Predictor):
@@ -78,6 +84,8 @@ class TangentPredictor(Predictor):
 
         return z_new, v
 
+    def reset(self):
+        self.prev_v = None
 
 class BorderedPredictor(Predictor):
     pass

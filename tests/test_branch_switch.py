@@ -19,16 +19,17 @@ x0 = jnp.array([0.])
 prob = BifurcationProblem(F, x0, p0,)
 correction = NaturalCorrector(k=1)
 prediction = TangentPredictor(k=1)
-xs, ps, stability, eigenvalues, tps = continuation(prob, prediction, correction, p_min, p_max, dsmax=0.001)
+branches = continuation(prob, prediction, correction, p_min, p_max, dsmax=0.01)
 
 
 dict_color = {'bp':0, 'hopf':1, 'nd':2}
 cmap = plt.get_cmap()
 fig, ax = plt.subplots()
-for tp, p, x in zip(tps, ps, xs):
-    if tp is not None:
-        ax.scatter(p,x[0], c=cmap(dict_color[tp]), label=tp)
-ax.scatter(ps, [x[0] for x in xs])
+for branch in branches:
+    for p in branch.points:
+        if p.tp is not None:
+            ax.scatter(p.z[-1], p.z[0], c=cmap(dict_color[p.tp]), label=p.tp, s=100)
+        ax.scatter(p.z[-1], p.z[0], c='k')
 plt.grid()
 plt.legend()
 plt.show()

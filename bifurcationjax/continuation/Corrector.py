@@ -6,7 +6,7 @@ from functools import partial
 
 
 class Corrector(ABC):
-    def __init__(self, delta: float = 0.2, max_steps: int = 200, epsilon: float = 1e-6):
+    def __init__(self, delta: float = 0.6, max_steps: int = 200, epsilon: float = 1e-6):
         self.delta = delta
         self.max_steps = max_steps
         self.epsilon = epsilon

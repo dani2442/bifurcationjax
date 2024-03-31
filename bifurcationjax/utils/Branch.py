@@ -1,6 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+import uuid
 import jax
+import jax.numpy as jnp
 from typing import List, Optional, Dict, Set
+from collections import deque
+
+# same point norm distance
+precision = 1e-1 
 
 
 @dataclass
@@ -23,17 +29,24 @@ class ContinuationPar:
 
 @dataclass
 class Point:
-    z: Optional[jax.Array] = None
-    itnewton: Optional[int] = None
-    itlinear: Optional[int] = None
-    ds: Optional[float] = None
-    n_unstable: Optional[int] = None
-    n_imag: Optional[int] = None
-    stable: Optional[bool] = None
-    step: Optional[int] = None
-    evals: Optional[jax.Array] = None
-    evecs: Optional[jax.Array] = None
-    tp: Optional[str] = None
+    z: jax.Array | None = None
+    itnewton: int | None = None
+    itlinear: int | None = None
+    ds: float | None = None
+    n_unstable: int | None = None
+    n_imag: int | None = None
+    stable: bool | None = None
+    step: int | None = None
+    evals: jax.Array | None = None
+    evecs: jax.Array | None = None
+    tp: str | None = None
+    id: Optional[str] = field(default_factory = lambda: str(uuid.uuid1()))
+
+    def __hash__(self):
+        return hash(self.id)
+    
+    def similar(self, other):
+        return jnp.linalg.norm(self.z - other.z, ord=2)<precision
 
 
 class Branch:
@@ -43,20 +56,26 @@ class Branch:
         self.id = Branch.current_count
         Branch.current_count += 1
 
-        self.points: List[Point] = points
+        self.points: List[Point] = deque(points)
         self.specialpoint_id: List[int] = []
         self.alg = ''
         
-    def add(self, p: Point):
-        self.points.append(p)
+    def add(self, p: Point, forward: bool = True):
+        if forward:
+            self.points.append(p)
+        else:
+            self.points.appendleft(p)
         
 
 class Diagram:
     branches: List[Branch] = []
-    bp: Dict[Point, Set[int]]
+    bps: Dict[Point, Set[int]] = dict()
 
     def get_bp(p: Point) -> Optional[Point]:
-        return False
+        for pb in Diagram.bps.keys():
+            if p.similar(pb):
+                return pb
+        return None
 
     def add_bp(p: Point, branches: List[Branch]):
         result = Diagram.get_bp(p)

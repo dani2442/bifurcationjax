@@ -23,7 +23,7 @@ class ContinuationPar:
     ds: float    = 1e-3
     n_inversion: int = 5
     new: int = 1
-    max_steps: int = 1000
+    max_steps: int = 100
     newton_options: NewtonPar = NewtonPar()
 
 
@@ -76,6 +76,9 @@ class Diagram:
             if p.similar(pb):
                 return pb
         return None
+    
+    def merge(self, branch2):
+        self.branches += branch2.branches
 
     def add_bp(p: Point, branches: List[Branch]):
         result = Diagram.get_bp(p)

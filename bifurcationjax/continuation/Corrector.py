@@ -18,6 +18,9 @@ class Corrector(ABC):
     def __call__(self, zpred, z_prev, f, v, h):
         c = 0
         z0 = zpred
+        if jnp.linalg.norm(f(z0[:-1], z0[-1]))<self.epsilon:
+            return z0, True
+        
         z1 = self._newton_step(z0, zpred, z_prev, f, self.delta, v, h)
         while jnp.linalg.norm(z1 - z0, ord=2)>self.epsilon:
             z0 = z1

@@ -57,8 +57,8 @@ class TangentPredictor(Predictor):
     @partial(jax.jit,  static_argnums=(0))
     def norm(self, z):
         x, p = z[...,:-1], z[...,-1]
-        return self.theta*jnp.dot(x,x)/(jnp.linalg.norm(x, ord=2) + 1e-5) + (1-self.theta)*p**2
-
+        #return self.theta*jnp.dot(x,x)/(jnp.linalg.norm(x, ord=2) + 1e-5) + (1-self.theta)*(p**2)
+        return self.theta*jnp.sqrt(len(x)*jnp.sum(jnp.square(x[1:] - x[:-1]))) + (1-self.theta)*(p**2)
 
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
         x, p = z[:-1], z[-1]

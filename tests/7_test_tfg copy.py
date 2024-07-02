@@ -10,7 +10,7 @@ from bifurcationjax.utils.Branch import ContinuationPar, Diagram
 from bifurcationjax.utils.plot import plot_bifurcation_diagram
 
 
-N = 10
+N = 50
 h = 1/N
 t = jnp.linspace(0,1,N)
 a=1

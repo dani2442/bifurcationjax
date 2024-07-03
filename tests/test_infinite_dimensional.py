@@ -10,10 +10,14 @@ from bifurcationjax.utils.Branch import ContinuationPar, Diagram
 from bifurcationjax.utils.plot import plot_bifurcation_diagram
 
 
-N = 50
+N = 10
 h = 1/N
 t = jnp.linspace(0,1,N)
 a=1
+
+"""
+Solving -u'' = lambd u - au^3
+"""
 
 @jax.jit
 def F(x, p):
@@ -31,7 +35,7 @@ def plot_fn(p):
     else:
         return jnp.min(p.z[:-1])
 
-n=3
+n=1
 p0 = (n*jnp.pi)**2
 x0= ((jnp.sqrt(2)/(jnp.pi))*jnp.sin(n*jnp.pi*t))[1:-1]
 
@@ -39,7 +43,7 @@ prob = BifurcationProblem(F, x0, p0,)
 par = ContinuationPar(p_min=5, p_max=120., dsmax=0.25, max_steps=500)
 correction = NaturalCorrector(epsilon=1e-2)
 prediction = TangentPredictor()
-branches = continuation(prob, prediction, correction, par, max_depth=0)
+branches = continuation(prob, prediction, correction, par, max_depth=1)
 
 
 plot_bifurcation_diagram(branches, plot_fn=plot_fn)

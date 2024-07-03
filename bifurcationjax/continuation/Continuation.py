@@ -50,7 +50,7 @@ def _continuation_loop(branch, prob, par, forward):
 
     #dz /= jnp.linalg.norm(dz, ord=2)
 
-    predictor = TangentPredictor(dz0 = dz, k=5)
+    predictor = TangentPredictor(dz0 = dz, k=8)
     corrector = PALC(delta=0.1)
     
     bps = []

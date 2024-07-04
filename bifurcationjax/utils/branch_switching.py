@@ -16,7 +16,7 @@ def normal_orthogonal_direction_method(f, z0, z1):
     evalues1, evectors1 = jnp.linalg.eig(Jfinal)
     
     phi_2 = evectors1[jnp.argmin(jnp.abs(evalues1))].real
-    return phi_2 /jnp.linalg.norm(phi_2, ord=2)
+    return phi_2 / jnp.linalg.norm(phi_2, ord=2)
 
 
 def normal_coeff(f, z0, z1):

@@ -10,7 +10,7 @@ from bifurcationjax.utils.Branch import ContinuationPar, Diagram
 from bifurcationjax.utils.plot import plot_bifurcation_diagram
 
 
-N = 10
+N = 40
 h = 1/N
 t = jnp.linspace(0,1,N)
 a=1
@@ -36,14 +36,14 @@ def plot_fn(p):
         return jnp.min(p.z[:-1])
 
 n=1
-p0 = 1.
+p0 = 0.
 x0 = jnp.zeros((N-2,)) 
 
 prob = BifurcationProblem(F, x0, p0,)
-par = ContinuationPar(p_min=-5., p_max=120., dsmax=6, max_steps=500)
+par = ContinuationPar(p_min=-5., p_max=200., dsmax=0.5, max_steps=500)
 correction = NaturalCorrector(epsilon=1e-3)
 prediction = TangentPredictor(k=N-2)
-branches = continuation(prob, prediction, correction, par, max_depth=1)
+branches = continuation(prob, prediction, correction, par, max_depth=2)
 
 
 plot_bifurcation_diagram(branches, plot_fn=plot_fn)

@@ -15,13 +15,10 @@ def plot_bifurcation_diagram(diagram: Diagram, axis: int = 0, plot_fn = lambda p
         xs = [plot_fn(p) for p in branch.points]
         ps = [p.z[-1] for p in branch.points]
         ax.plot(ps, xs, color=cmap((b_len - i)/b_len), label=f"Branch $n={i+1}$")
-        ax.scatter(ps, xs)
+        #ax.scatter(ps, xs)
 
-    #ax.axhline(y=0, color='r', label='Trivial Solution')
-    #ax.scatter([(i**2)*(3.1415)**2 for i in range(1,5)], [0]*4, label='Bifurcation Points', zorder=41)
-    
     for bp in diagram.bps.keys():
-        ax.scatter(bp.z[-1], plot_fn(bp), label=bp.tp, color='red')
+        ax.scatter(bp.z[-1], plot_fn(bp), label=bp.tp, color='red', zorder=20)
 
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))

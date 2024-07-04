@@ -2,8 +2,8 @@ import jax.numpy as jnp
 import jax
 import matplotlib.pyplot as plt
 
-from bifurcationjax.continuation.Corrector import NaturalCorrector
-from bifurcationjax.continuation.Predictor import TangentPredictor, NaturalPredictor, SecantPredictor
+from bifurcationjax.continuation.Corrector import CorrectorParams
+from bifurcationjax.continuation.Predictor import PredictorParams
 from bifurcationjax.continuation.Continuation import continuation
 from bifurcationjax.BifurcationProblem import BifurcationProblem
 from bifurcationjax.utils.Branch import ContinuationPar, Diagram
@@ -40,10 +40,10 @@ p0 = 0.
 x0 = jnp.zeros((N-2,)) 
 
 prob = BifurcationProblem(F, x0, p0,)
-par = ContinuationPar(p_min=-5., p_max=200., dsmax=0.5, max_steps=500)
-correction = NaturalCorrector(epsilon=1e-3)
-prediction = TangentPredictor(k=N-2)
-branches = continuation(prob, prediction, correction, par, max_depth=2)
+par = ContinuationPar(p_min=-5., p_max=120., dsmax=0.5, max_steps=500)
+correction_params = CorrectorParams(method='PALC', epsilon=1e-3)
+prediction_params = PredictorParams(method='tangent', k=N-2)
+branches = continuation(prob, prediction_params, correction_params, par, max_depth=2)
 
 
-plot_bifurcation_diagram(branches, plot_fn=plot_fn)
+plot_bifurcation_diagram(branches, plot_fn=plot_fn, path_save='images/bifurcation_diagram2.pdf')

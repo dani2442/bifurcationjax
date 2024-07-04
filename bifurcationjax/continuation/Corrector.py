@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 import jax
 import jax.numpy as jnp
 from functools import partial
+from pydantic import BaseModel
+import pydantic
 
 
 class Corrector(ABC):
-    def __init__(self, delta: float = 0.6, max_steps: int = 200, epsilon: float = 1e-6):
+    def __init__(self, delta: float = 0.6, max_steps: int = 200, epsilon: float = 1e-6, *args, **kwargs):
         self.delta = delta
         self.max_steps = max_steps
         self.epsilon = epsilon
@@ -73,9 +75,6 @@ class NaturalCorrector(Corrector):
 
 
 class PALC(Corrector):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @partial(jax.jit, static_argnums=(0,3))
     def _mixed_jacobian(self, z, v, f):
         x, p = z[:-1], z[-1]
@@ -131,5 +130,27 @@ class PALC2(Corrector):
         return z
 
 class MoorePenroseContinuation(Corrector):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
+
+
+class CorrectorParams(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+    method: str = 'PALC'
+    delta: float = 0.3
+    max_steps: int = 200
+    epsilon: float = 1e-6
+    k: int = 0
+    theta: float = 0.5
+    N: int = 3
+    
+
+    def init(self, **kwargs) -> Corrector:
+        dicc = self.model_dump()
+        dicc.update(kwargs)
+        if dicc['method'] == 'newton':
+            return NewtonCorrector(**dicc)
+        elif dicc['method'] == 'natural':
+            return NaturalCorrector(**dicc)
+        elif dicc['method'] == 'PALC':
+            return PALC(**dicc)

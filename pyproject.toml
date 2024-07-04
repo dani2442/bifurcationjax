@@ -12,6 +12,7 @@ matplotlib = "^3.8.3"
 jax = "^0.4.25"
 jaxlib = "^0.4.25"
 networkx = "^3.2.1"
+pydantic = "^2.8.2"
 
 
 [tool.poetry.group.dev.dependencies]

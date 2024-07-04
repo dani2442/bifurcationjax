@@ -1,12 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Callable
+from typing import Any, Optional, Callable, Optional
 from functools import partial
 import jax
 import jax.numpy as jnp
+from pydantic import BaseModel
+
 
 class Predictor(ABC):
     @abstractmethod
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> Any:
+        pass
+
+    def __init__(self, *args, **kwargs):
         pass
 
     def reset(self):
@@ -19,12 +24,13 @@ class NaturalPredictor(Predictor):
         return z, jnp.eye(len(z), M=1, k=1-len(z)).reshape(-1)
 
 
-class SecantPredictor(Predictor):
-    def __init__(self, dz0: jax.Array) -> None:
+class SecantPredictor(Predictor):  
+    def __init__(self, dz0: jax.Array, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.dz0 = dz0
         self.theta = 0.5
         self.prev = None
-    
+
     @partial(jax.jit,  static_argnums=(0))
     def norm(self, z):
         x, p = z[...,:-1], z[...,-1]
@@ -36,7 +42,6 @@ class SecantPredictor(Predictor):
         else:
             v = (z-self.prev)
 
-        #v = v/jnp.linalg.norm(v, ord=2)
         v = v/jnp.linalg.norm(v, ord=2)
 
         z_new = z + ds*v
@@ -48,17 +53,18 @@ class SecantPredictor(Predictor):
 
 
 class TangentPredictor(Predictor):
-    def __init__(self, dz0: Optional[jax.Array] = None, k: Optional[int] = 0) -> None:
+    def __init__(self, dz0: Optional[jax.Array] = None, k: Optional[int] = 0, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.dz0 = dz0
         self.prev_v = None
         self.theta = 0.5
         self.k = k
 
+
     @partial(jax.jit,  static_argnums=(0))
     def norm(self, z):
         x, p = z[...,:-1], z[...,-1]
         return self.theta*jnp.dot(x,x)/(jnp.linalg.norm(x, ord=2) + 1e-5) + (1-self.theta)*(p**2)
-        #return self.theta*jnp.sqrt(len(x)*jnp.sum(jnp.square(x[1:] - x[:-1]))) + (1-self.theta)*(p**2)
 
     def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
         x, p = z[:-1], z[-1]
@@ -89,4 +95,26 @@ class TangentPredictor(Predictor):
 
 class BorderedPredictor(Predictor):
     pass
+
+
+
+class PredictorParams(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    method: str = 'tangent'
+    dz0: Optional[jax.Array] = None
+    prev_v: Optional[jax.Array] = None
+    prev_z: Optional[jax.Array] = None
+    theta: float = 0.5
+    k: int = 0
+
+
+    def init(self, **kwargs) -> Predictor:
+        dicc = self.model_dump()
+        dicc.update(kwargs)
+        if dicc['method'] == 'tangent':
+            return TangentPredictor(**dicc)
+        elif dicc['method'] == 'secant':
+            return SecantPredictor(**dicc)
 

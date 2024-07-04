@@ -5,7 +5,6 @@ from typing import Tuple
 
 precision = 1e-4
 
-
 def get_bifurcation_type(p0: Point, p1: Point):
     n_unstable, n_unstable_prev = p1.n_unstable, p0.n_unstable
     n_imag, n_imag_prev = p1.n_imag, p0.n_imag
@@ -40,7 +39,7 @@ def get_bifurcation_type(p0: Point, p1: Point):
         known = True
     
     if delta_n_unstable < delta_n_imag:
-        print("Error")
+        print("Unknown Bifurcation Point")
         tp = 'nd'
         known = True
 

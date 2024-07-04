@@ -10,12 +10,12 @@ from bifurcationjax.utils.Branch import Point, Branch, Diagram, ContinuationPar
 from bifurcationjax.utils import get_bifurcation_type, is_stable
 
 
-def continuation(prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int = 2):
+def continuation(prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int = 2, k_start: int = 0):
     p0 = Point(step=0)
     J = jax.jit(jax.jacobian(prob.f))
     z = jnp.append(prob.x0, prob.p0)
 
-    p0.z, success = NaturalCorrector(delta=0.1, k=1)(z, None, prob.f, None, par.dsmax)
+    p0.z, success = NaturalCorrector(delta=0.2, k=k_start)(z, None, prob.f, None, par.dsmax)
     
     p0.evals, p0.evecs = jnp.linalg.eig(J(p0.z[:-1], p0.z[-1])) 
     p0.n_unstable, p0.n_imag, p0.stable = is_stable(p0.evals)
@@ -52,7 +52,7 @@ def _continuation_loop(branch: Branch, prob: BifurcationProblem, prediction_para
     dz = p1.z - p_initial.z
 
     predictor = prediction_params.init(dz0=dz)
-    corrector = correction_params.init(delta=0.1)
+    corrector = correction_params.init()
     
     bps = []
     p0 = p1
@@ -103,7 +103,7 @@ def _continuation(branch: Branch, prob: BifurcationProblem, prediction_params: P
         z1_b = p1.z + par.dsmax*v_b
         z1_c = p1.z - par.dsmax*v_b
 
-        corrector_b = correction_params.init(delta=0.1)
+        corrector_b = correction_params.init()
         
         z2_b, success_b = corrector_b(z1_b, p1.z, prob.f, v_b, par.dsmax)
         z2_c, success_c = corrector_b(z1_c, p1.z, prob.f, -v_b, par.dsmax)

@@ -11,7 +11,7 @@ from bifurcationjax.utils import get_bifurcation_type, is_stable
 
 
 def continuation(prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int = 2, k_start: int = 0):
-    diagram = Diagram()
+    diagram = Diagram(branches=[], bps=[])
 
     p0 = Point(step=0)
     J = jax.jit(jax.jacobian(prob.f))

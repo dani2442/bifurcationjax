@@ -10,7 +10,8 @@ def plot_bifurcation_diagram(
         plot_fn = lambda p: p.z[0], 
         path_save: str | None = None, 
         plot_dots: bool = False, 
-        ax: mpl.axes.Axes = None
+        ax: mpl.axes.Axes = None,
+        title: str = ''
     ):
     
     dict_color = {'bp':0, 'hopf':1, 'nd':2}
@@ -40,6 +41,7 @@ def plot_bifurcation_diagram(
 
     ax.legend(by_label.values(), by_label.keys())
     ax.grid()
+    ax.set_title(title)
     
     if path_save:
         plt.savefig(path_save, dpi=300)

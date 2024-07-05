@@ -68,7 +68,9 @@ class Branch:
         
 
 class Diagram:
-    def __init__(self, branches: List[Branch] = [], bps: Dict[Point, Set[int]] = dict()):
+    def __init__(self, 
+                 branches = [], 
+                 bps = dict()):
         self.branches = branches
         self.bps = bps
         

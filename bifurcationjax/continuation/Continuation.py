@@ -11,6 +11,8 @@ from bifurcationjax.utils import get_bifurcation_type, is_stable
 
 
 def continuation(prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int = 2, k_start: int = 0):
+    diagram = Diagram()
+
     p0 = Point(step=0)
     J = jax.jit(jax.jacobian(prob.f))
     z = jnp.append(prob.x0, prob.p0)
@@ -35,12 +37,12 @@ def continuation(prob: BifurcationProblem, prediction_params: PredictorParams, c
     p1.n_unstable, p1.n_imag, p1.stable = is_stable(p1.evals)
 
     branch = Branch([p0, p1])
-    _continuation(branch, prob, prediction_params, correction_params, par, max_depth)
+    _continuation(diagram, branch, prob, prediction_params, correction_params, par, max_depth)
 
-    return Diagram
+    return diagram
 
 
-def _continuation_loop(branch: Branch, prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, forward: bool):
+def _continuation_loop(diagram: Diagram, branch: Branch, prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, forward: bool):
     J = jax.jit(jax.jacobian(prob.f))
 
     if forward:
@@ -73,12 +75,12 @@ def _continuation_loop(branch: Branch, prob: BifurcationProblem, prediction_para
         known, p1.tp = get_bifurcation_type(p0, p1)
 
         if p1.tp == 'bp':
-            is_bp = Diagram.get_bp(p1)
+            is_bp = diagram.get_bp(p1)
             if is_bp is None:
-                Diagram.bps[p1] = {branch.id}
+                diagram.bps[p1] = {branch.id}
                 bps.append([p0, p1])
             else:
-                Diagram.bps[is_bp].update({branch.id})
+                diagram.bps[is_bp].update({branch.id})
 
         branch.add(p1, forward=forward)
         p0 = p1
@@ -86,14 +88,14 @@ def _continuation_loop(branch: Branch, prob: BifurcationProblem, prediction_para
     return bps
 
 
-def _continuation(branch: Branch, prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int, depth: int = 1):    
+def _continuation(diagram: Diagram, branch: Branch, prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int, depth: int = 1):    
     J = jax.jit(jax.jacobian(prob.f))
 
     bps = []
-    bps += _continuation_loop(branch, prob, prediction_params, correction_params, par, forward=True)
-    bps += _continuation_loop(branch, prob, prediction_params, correction_params, par, forward=False)
+    bps += _continuation_loop(diagram, branch, prob, prediction_params, correction_params, par, forward=True)
+    bps += _continuation_loop(diagram, branch, prob, prediction_params, correction_params, par, forward=False)
 
-    Diagram.branches.append(branch)
+    diagram.branches.append(branch)
 
     if depth >= max_depth: return 
 
@@ -120,5 +122,5 @@ def _continuation(branch: Branch, prob: BifurcationProblem, prediction_params: P
             p1_c.n_unstable, p1_c.n_imag, p1_c.stable = is_stable(p1_c.evals)
 
             branch_new = Branch([p1_c, p0_b, p1_b])
-            _continuation(branch_new, prob, prediction_params, correction_params, par, max_depth, depth=depth+1)
+            _continuation(diagram, branch_new, prob, prediction_params, correction_params, par, max_depth, depth=depth+1)
     

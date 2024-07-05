@@ -68,11 +68,13 @@ class Branch:
         
 
 class Diagram:
-    branches: List[Branch] = []
-    bps: Dict[Point, Set[int]] = dict()
+    def __init__(self, branches: List[Branch] = [], bps: Dict[Point, Set[int]] = dict()):
+        self.branches = branches
+        self.bps = bps
+        
 
-    def get_bp(p: Point) -> Optional[Point]:
-        for pb in Diagram.bps.keys():
+    def get_bp(self, p: Point) -> Optional[Point]:
+        for pb in self.bps.keys():
             if p.similar(pb):
                 return pb
         return None
@@ -80,12 +82,12 @@ class Diagram:
     def merge(self, branch2):
         self.branches += branch2.branches
 
-    def add_bp(p: Point, branches: List[Branch]):
-        result = Diagram.get_bp(p)
+    def add_bp(self, p: Point, branches: List[Branch]):
+        result = self.get_bp(p)
 
         branches_set = set(branch.id for branch in branches)
         if result is None:
-            Diagram.bp[p] = branches_set
+            self.bp[p] = branches_set
         else:
-            Diagram.bp[p].update(branches_set)
+            self.bp[p].update(branches_set)
 

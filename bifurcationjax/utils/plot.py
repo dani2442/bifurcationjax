@@ -4,9 +4,19 @@ import matplotlib as mpl
 
 from bifurcationjax.utils.Branch import Diagram
 
-def plot_bifurcation_diagram(diagram: Diagram, axis: int = 0, plot_fn = lambda p: p.z[0], path_save: str | None = None, plot_dots: bool = False):
+def plot_bifurcation_diagram(
+        diagram: Diagram, 
+        axis: int = 0, 
+        plot_fn = lambda p: p.z[0], 
+        path_save: str | None = None, 
+        plot_dots: bool = False, 
+        ax: mpl.axes.Axes = None
+    ):
+    
     dict_color = {'bp':0, 'hopf':1, 'nd':2}
-    fig, ax = plt.subplots(figsize=(8,6))
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8,6))
 
     cmap = mpl.colormaps['Blues']
 
@@ -28,9 +38,8 @@ def plot_bifurcation_diagram(diagram: Diagram, axis: int = 0, plot_fn = lambda p
     ax.set_xlabel('$\mu$')
     ax.set_ylabel('$x$')
 
-    plt.legend(by_label.values(), by_label.keys())
-    plt.grid()
+    ax.legend(by_label.values(), by_label.keys())
+    ax.grid()
     
     if path_save:
         plt.savefig(path_save, dpi=300)
-    plt.show()

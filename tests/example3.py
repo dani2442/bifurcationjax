@@ -4,6 +4,7 @@ Example shown in https://bifurcationkit.github.io/BifurcationKitDocs.jl/stable/B
 
 import jax.numpy as jnp
 import jax
+import matplotlib.pyplot as plt
 
 from bifurcationjax.continuation.Corrector import CorrectorParams
 from bifurcationjax.continuation.Predictor import PredictorParams
@@ -35,3 +36,4 @@ branches = continuation(prob, prediction_params, correction_params, par, max_dep
 
 
 plot_bifurcation_diagram(branches, plot_fn=plot_fn, path_save='images/example3.png', plot_dots=True)
+plt.show()

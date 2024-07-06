@@ -133,6 +133,60 @@ class MoorePenroseContinuation(Corrector):
     pass
 
 
+class MethodIICorrector(Corrector):
+    def __init__(self, v, phi, phi_0, eps, z_old, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.phi = phi
+        self.phi_0 = phi_0
+        
+        beta = v[-1]
+        alpha = jnp.mean((v[:-1] - beta*phi_0)/phi)
+
+        self.alpha_2 = beta*(1 + jnp.inner(phi_0, phi_0))
+        self.beta_2 = -alpha*jnp.inner(phi, phi)
+
+        self.z_old = z_old
+
+        @jax.jit
+        def N(z):
+            x, p = z[:-1], z[-1]
+            x_old, p_old = self.z_old[:-1], self.z_old[-1]
+            v = x - x_old - eps*(self.beta_2*phi_0 + self.alpha_2*phi)
+            eta = p - p_old - eps*self.beta_2
+
+            sum_1 = (self.beta_2*phi_0.T + self.alpha_2*phi.T) @ v
+            sum_2 = self.beta_2*eta
+            return  sum_1 + sum_2 
+
+        @jax.jit
+        def _N(z):
+            return N(z)
+        
+        self.N = N
+        self._N = _N
+
+    @partial(jax.jit, static_argnums=(0,2))
+    def _mixed_jacobian(self, z, f):
+        x, p = z[:-1], z[-1]
+        j = jax.jacobian(f, argnums=0)(x, p)
+        pder = jax.jacobian(f, argnums=1)(x, p)
+        Jmixed = jnp.column_stack([j, pder])
+
+        #last_row = jax.jacobian(self._N)(z)
+        last_row = jnp.append(self.beta_2*self.phi_0 + self.alpha_2*self.phi, self.beta_2)
+        Jfinal = jnp.concat([Jmixed, last_row.T])
+        return Jfinal
+
+    @partial(jax.jit, static_argnums=(0,4))
+    def _newton_step(self, z, zpred, z_prev, f, delta, v, h):
+        Jfinal = self._mixed_jacobian(z, f)
+        g = f(z[:-1], z[-1])
+        gz = jnp.append(g, self.N(z[:-1], z[-1]))
+        z = z - delta*jnp.linalg.inv(Jfinal) @ gz
+        return z
+    
+
+
 class CorrectorParams(BaseModel):
     class Config:
         arbitrary_types_allowed = True

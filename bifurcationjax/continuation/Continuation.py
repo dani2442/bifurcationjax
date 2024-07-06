@@ -5,13 +5,13 @@ from typing import Tuple
 from bifurcationjax.BifurcationProblem import BifurcationProblem
 from bifurcationjax.continuation.Corrector import CorrectorParams, NaturalCorrector, PALC
 from bifurcationjax.continuation.Predictor import PredictorParams, TangentPredictor
-from bifurcationjax.utils.branch_switching import normal_orthogonal_direction_method
+from bifurcationjax.utils.branch_switching import normal_orthogonal_direction_method, method_I, method_II, method_crandall_rabinowitz
 from bifurcationjax.utils.Branch import Point, Branch, Diagram, ContinuationPar
-from bifurcationjax.utils import get_bifurcation_type, is_stable
+from bifurcationjax.utils.bifurcation import get_bifurcation_type, is_stable
 
 
 def continuation(prob: BifurcationProblem, prediction_params: PredictorParams, correction_params: CorrectorParams, par: ContinuationPar, max_depth: int = 2, k_start: int = 0):
-    diagram = Diagram(branches=[], bps=[])
+    diagram = Diagram(branches=[], bps={})
 
     p0 = Point(step=0)
     J = jax.jit(jax.jacobian(prob.f))
@@ -100,7 +100,12 @@ def _continuation(diagram: Diagram, branch: Branch, prob: BifurcationProblem, pr
     if depth >= max_depth: return 
 
     for p0,p1 in bps:
-        v_b = normal_orthogonal_direction_method(prob.f, p0.z, p1.z)
+        if par.branch_switch == 'normal_orthogonal_direction':
+            v_b = normal_orthogonal_direction_method(prob.f, p0.z, p1.z)
+        elif par.branch_switch == 'crandall_rabinowitz':
+            v_b = method_crandall_rabinowitz(prob.f, p0.z, p1.z)
+        else:
+            raise NotImplementedError
         
         z1_b = p1.z + par.dsmax*v_b
         z1_c = p1.z - par.dsmax*v_b

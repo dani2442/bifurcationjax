@@ -25,6 +25,7 @@ class ContinuationPar:
     new: int = 1
     max_steps: int = 100
     newton_options: NewtonPar = NewtonPar()
+    branch_switch: str = 'crandall_rabinowitz'
 
 
 @dataclass

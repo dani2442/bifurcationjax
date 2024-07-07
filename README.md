@@ -50,11 +50,8 @@ plt.show()
 
 # Example 2
 Here is another example, this time we will study the equation
-$$\mathfrak{F}(u, p)\\
-x' = -x - y\\
-y' = -p*z + r*y + s*z^2 - y*z^2\\
-z' = -q(x + z)
-$$
+
+$$\mathfrak{F}(u, p)= x' = -x - y \quad y' = -pz + ry + s z^2 - y z^2 \quad z' = -q(x + z)$$
 ```python
 def maasch_rule(u, p):
     x, y, z = u[...,0], u[...,1], u[...,2]
@@ -86,10 +83,8 @@ plt.show()
 
 # Example 3
 This time we will study the equation 
-$$
--u'' = \lambda u - au^3\quad\quad \text{ at }(0,1)\\
-$$
-
+$$-u'' = \lambda u - au^3\quad\quad \text{ at }(0,1)$$
+And $x(0)=x(1) = 0$.
 ```python
 N = 40
 h = 1/N

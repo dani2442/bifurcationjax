@@ -66,28 +66,34 @@ class TangentPredictor(Predictor):
         x, p = z[...,:-1], z[...,-1]
         return self.theta*jnp.dot(x,x)/(jnp.linalg.norm(x, ord=2) + 1e-5) + (1-self.theta)*(p**2)
 
-    def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
+    @partial(jax.jit,  static_argnums=(0))
+    def calculate_v(f: Callable, last_row: jax.Array, z: jax.Array, ds: float):
         x, p = z[:-1], z[-1]
         j = jax.jacobian(f, argnums=0)(x, p)
         pder = jax.jacobian(f, argnums=1)(x, p)
         Jmixed = jnp.column_stack([j, pder])
-        if self.prev_v is None:
-            last_row = jnp.eye(len(z), M=1, k=-self.k)
-            Jfinal = jnp.concat([Jmixed, last_row.T])
-            v = jnp.linalg.inv(Jfinal)@jnp.eye(len(z), M=1, k=1-len(z))
-            if self.dz0 is not None:
-                if jnp.inner(self.dz0, v.reshape(-1))<0: v = -v
-        else:
-            last_row = self.prev_v.reshape(-1, 1)
-            Jfinal = jnp.concat([Jmixed, last_row.T])
-            v = jnp.linalg.inv(Jfinal)@jnp.eye(len(z), M=1, k=1-len(z))
+        
+        Jfinal = jnp.concat([Jmixed, last_row.T])
+        v = jnp.linalg.inv(Jfinal)@jnp.eye(len(z), M=1, k=1-len(z))
         
         v = v.reshape(-1)
-        #v = v/self.norm(v)
-        v = v.reshape(-1)/jnp.linalg.norm(v, ord=2)
+        v = v/jnp.linalg.norm(v, ord=2)
         z_new = z + v*ds
-        self.prev_v = v
+        return z_new, v
+    
 
+    def __call__(self, z: jax.Array, ds: float, f: Callable) -> jax.Array:
+        if self.prev_v is None:
+            last_row = jnp.eye(len(z), M=1, k=-self.k)
+        else:
+            last_row = self.prev_v.reshape(-1, 1)
+
+        z_new, v = TangentPredictor.calculate_v(f, last_row, z, ds)
+
+        if self.dz0 is not None:
+            if jnp.inner(self.dz0, v.reshape(-1))<0: v = -v
+
+        self.prev_v = v
         return z_new, v
 
     def reset(self):

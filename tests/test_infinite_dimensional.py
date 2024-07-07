@@ -10,7 +10,7 @@ from bifurcationjax.utils.Branch import ContinuationPar
 from bifurcationjax.utils.plot import plot_bifurcation_diagram
 
 
-N = 10
+N = 40
 h = 1/N
 t = jnp.linspace(0,1,N)
 a=1
@@ -48,3 +48,4 @@ branches = continuation(prob, prediction_params, correction_params, par, max_dep
 
 
 plot_bifurcation_diagram(branches, plot_fn=plot_fn)
+plt.show()

@@ -1,5 +1,6 @@
 import jax.numpy as jnp
 import jax
+import matplotlib.pyplot as plt
 
 from bifurcationjax.continuation.Corrector import CorrectorParams
 from bifurcationjax.continuation.Predictor import PredictorParams
@@ -34,15 +35,15 @@ def plot_fn(p):
     else:
         return jnp.min(p.z[:-1])
 
-n=1
 p0 = 0.
 x0 = jnp.zeros((N-2,)) 
 
 prob = BifurcationProblem(F, x0, p0,)
-par = ContinuationPar(p_min=-5., p_max=120., dsmax=0.5, max_steps=500)
+par = ContinuationPar(p_min=-5., p_max=200., dsmax=0.25, max_steps=1000, branch_switch='normal_orthogonal_direction')
 correction_params = CorrectorParams(method='PALC', epsilon=1e-3)
 prediction_params = PredictorParams(method='tangent', k=N-2)
 branches = continuation(prob, prediction_params, correction_params, par, max_depth=2)
 
 
-plot_bifurcation_diagram(branches, plot_fn=plot_fn, path_save='images/bifurcation_diagram_v2.pdf')
+plot_bifurcation_diagram(branches, plot_fn=plot_fn, path_save='images/bifurcation_diagram_v3.pdf')
+plt.show()

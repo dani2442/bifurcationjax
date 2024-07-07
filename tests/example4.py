@@ -31,9 +31,9 @@ p0 = 0.0
 x0 = jnp.array([-1.4, -1.4, -1.4])
 
 prob = BifurcationProblem(maasch_rule, x0, p0,)
-par = ContinuationPar(p_min=-0.1, p_max=2., dsmax=0.1, max_steps=500)
-prediction_params = PredictorParams(method='tangent', k=0)
-correction_params = CorrectorParams(method='PALC', epsilon=1e-3)
+par = ContinuationPar(p_min=-0.1, p_max=2., dsmax=0.05, max_steps=500)
+prediction_params = PredictorParams(method='tangent', k=1)
+correction_params = CorrectorParams(method='PALC', epsilon=1e-4)
 branches = continuation(prob, prediction_params, correction_params, par, max_depth=1, k_start=0)
 
 

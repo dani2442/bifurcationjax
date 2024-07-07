@@ -50,14 +50,11 @@ plt.show()
 
 # Example 2
 Here is another example, this time we will study the equation
-$$
-\mathfrak{F}(u, p) = 
-\begin{cases}
+$$\mathfrak{F}(u, p) = \begin{cases}
 x' = -x - y\\
 y' = -p*z + r*y + s*z^2 - y*z^2\\
 z' = -q(x + z)
-\end{cases}
-$$
+\end{cases}$$
 ```python
 def maasch_rule(u, p):
     x, y, z = u[...,0], u[...,1], u[...,2]
@@ -89,12 +86,10 @@ plt.show()
 
 # Example 3
 This time we will study the equation 
-$$ 
-\begin{cases}
+$$\begin{cases}
 -u'' = \lambda u - au^3\quad\quad \text{ at }(0,1)\\
 u(0) = u(1) = 0\\
-\end{cases}
-$$
+\end{cases}$$
 
 ```python
 N = 40
